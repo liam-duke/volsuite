@@ -2,7 +2,7 @@
 
 VolSuite is a python-based CLI tool designed for intuitive equity data retrieval and analysis. VolSuite enables users to quickly fetch historical ticker data and current option chains via yahoo finance. Additionally supports rolling realized volatility computation and visualization; volatility surface and skew modeling; configurable user settings with session persistence and data import/export capabilities.
 
-## Running Commands
+## Running commands
 
 VolSuite is a CLI tool, meaning that all user interaction is done through a terminal. In order to perform an action, a line should begin with a base command followed by its necessary arguments and optional flags (a full list of available commands and their arguments can be viewed by typing 'help'). Commands which retrieve data will require a ticker to be specified by the user when running – this can be done by typing 'ticker <symbol>'.
 
@@ -10,7 +10,7 @@ Flags are optional arguments which can be used to configure the output of some c
 
 Upon first running, VolSuite will create a default config.json file in the same directory as the executable. This file can be modified directly by the user or from within the CLI by using the 'config' command.
 
-## Example Usage
+## Example usage
 
 ### Historical Price Modeling:
 
