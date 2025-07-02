@@ -12,7 +12,7 @@ Upon first running, VolSuite will create a default config.json file in the same 
 
 ## Example usage
 
-### Historical Price Modeling:
+### Historical price modeling:
 
 Let's say I want to retrieve a list of historial prices of Apple Inc. ($AAPL) over the past year. First I run the following command to select the ticker 'AAPL' and connect to the yfinance API:
 
@@ -46,7 +46,7 @@ import exports/AAPL_history_1mo.csv
 
 Whenever a dataframe is loaded, via a command or import, it will be saved to the cache and referenced for any following commands until a new dataframe is loaded. 'import' will always search for the specified path in the same directory as the executable.
 
-### Option Chains:
+### Option chains:
 
 To view the current call option chain expiring 2025-07-18 for $AAPL, I can type:
 
@@ -56,7 +56,7 @@ oc 2025-07-18 calls
 
 If I want to view puts, I would replace 'calls' with 'puts'.
 
-### Volatility Modeling:
+### Volatility modeling:
 
 To create a plot of rolling close-to-close volatility of $AAPL for the past year, first I run the following:
 
