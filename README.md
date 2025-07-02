@@ -4,7 +4,7 @@ VolSuite is a python-based CLI tool designed for intuitive equity data retrieval
 
 ## Running commands
 
-VolSuite is a CLI tool, meaning that all user interaction is done through a terminal. In order to perform an action, a line should begin with a base command followed by its necessary arguments and optional flags (a full list of available commands and their arguments can be viewed by typing 'help'). Commands which retrieve data will require a ticker to be specified by the user when running – this can be done by typing 'ticker <symbol>'.
+VolSuite is a CLI tool, meaning that all user interaction is done through a terminal. In order to perform an action, a line should begin with a base command followed by its necessary arguments and optional flags (a full list of available commands and their arguments can be viewed by typing 'help (<command>)'. Commands which retrieve data will require a ticker to be specified by the user when running – this can be done by typing 'ticker <symbol>'.
 
 Flags are optional arguments which can be used to configure the output of some commands. They are formatted as '<flag>=<value>'.
 
