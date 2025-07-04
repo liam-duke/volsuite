@@ -25,6 +25,7 @@ def build():
             "--name=volsuite",
             "src/volsuite/main.py",
             "--hidden-import=scipy._cyutility",
+            "--onefile",
         ],
         check=True,
     )
