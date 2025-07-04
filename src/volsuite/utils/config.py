@@ -7,14 +7,16 @@ console = Console()
 # Default configuration settings
 
 DEFAULT_CONFIG = {
-    "DEFAULT_TICKER": None,
-    "EXPORT_FOLDER": "exports",
-    "HV_ROLLING_WINDOWS": [5, 10, 20, 50],
-    "IV_SURFACE_CMAP": "jet",
-    "IV_SURFACE_STRIKE_RANGE": 0.2,
-    "IV_SURFACE_RESOLUTION": 25,
-    "DISPLAY_MAX_ROWS": 0,
-    "DISPLAY_MAX_COLUMN_WIDTH": 0,
+    "default_ticker": None,
+    "export_folder": "exports",
+    "hv_rolling_windows": [5, 10, 20, 50],
+    "iv_surface_cmap": "jet",
+    "iv_surface_range": 0.2,
+    "iv_surface_res": 25,
+    "plot_grid": False,
+    "plot_legend": False,
+    "display_max_rows": 0,
+    "display_max_colwidth": 0,
 }
 
 

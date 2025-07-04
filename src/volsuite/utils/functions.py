@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 from datetime import datetime
 from rich.console import Console
+import shlex
 
 # Initialize rich printing
 console = Console()
@@ -32,7 +33,11 @@ def parse_line(line: str):
         args: A list of string arguments.
         flags: A dictionary mapping flags (substring to the left of '=') to their value (substring to the right of '=').
     """
-    tokens = line.strip().split()
+    tokens = line.strip()
+    try:
+        tokens = shlex.split(tokens)
+    except ValueError as e:
+        console_error(e)
     if not tokens:
         return [], {}
 
@@ -40,10 +45,14 @@ def parse_line(line: str):
     flags = {}
 
     for token in tokens:
-        if "=" in token:
-            flag, value = token.split("=", 1)
-            value = value.replace("_", " ")
-            flags[flag] = value
+        if token.startswith("--"):
+            if "=" in token:
+                flag, value = token.split("=", 1)
+                flags[flag] = value
+            else:
+                flag, value = token, 1
+        elif token.startswith("-"):
+            flags[token] = True
         else:
             args.append(token)
 
@@ -75,3 +84,13 @@ def console_error(error: Exception):
         error: Exception to be printed.
     """
     console.print(f"[red]Error: {str(error).capitalize()}.")
+
+
+def type_eval(s: str):
+    """
+    Evaluate string with type conversion to int, float, bool or list.
+
+    Args:
+        s: String to be converted
+    """
+    pass

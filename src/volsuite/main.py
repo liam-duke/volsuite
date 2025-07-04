@@ -9,6 +9,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import yfinance as yf
+from ast import literal_eval
 
 
 # Internal libraries
@@ -20,7 +21,13 @@ from volsuite.utils.decorators import (
     requires_min_args,
 )
 from volsuite.utils.dicts import VALID_PERIODS, VALID_INTERVALS
-from volsuite.utils.functions import get_base_path, parse_line, is_date, console_error
+from volsuite.utils.functions import (
+    get_base_path,
+    parse_line,
+    is_date,
+    console_error,
+    type_eval,
+)
 from volsuite.utils.volatility import hv, iv_skew, iv_surface, plot_iv_surface
 
 
@@ -39,27 +46,27 @@ CONFIG_PATH = BASE_PATH / "config.json"
 config = init_config(CONFIG_PATH)
 
 # Verify existence of default ticker if specified on startup
-if config["DEFAULT_TICKER"]:
+if config["default_ticker"]:
     try:
-        yf.Ticker(config["DEFAULT_TICKER"]).fast_info["lastPrice"]
+        yf.Ticker(config["default_ticker"]).fast_info["lastPrice"]
         pass
     except:
         console.print(
-            f"[red]Error: Unable to fetch data for symbol '{config["DEFAULT_TICKER"]}' from yfinance API. Check your connection and/or that the symbol exists."
+            f"[red]Error: Unable to fetch data for symbol '{config["default_ticker"]}' from yfinance API. Check your connection and/or that the symbol exists."
         )
 
 # Load pandas configuration settings
 pd.set_option(
     "display.max_rows",
-    None if config["DISPLAY_MAX_ROWS"] == 0 else int(config["DISPLAY_MAX_ROWS"]),
+    None if int(config["display_max_rows"]) == 0 else int(config["display_max_rows"]),
 )
 
 pd.set_option(
     "display.max_colwidth",
     (
         None
-        if config["DISPLAY_MAX_COLUMN_WIDTH"] == 0
-        else int(config["DISPLAY_MAX_COLUMN_WIDTH"])
+        if int(config["display_max_colwidth"]) == 0
+        else int(config["display_max_colwidth"])
     ),
 )
 
@@ -76,9 +83,10 @@ class MainCLI(cmd.Cmd):
 
     def __init__(self):
         super().__init__()
-        self._ticker = (
-            yf.Ticker(config["DEFAULT_TICKER"]) if config["DEFAULT_TICKER"] else None
-        )
+        # self._ticker = (
+        #     yf.Ticker(config["default_ticker"]) if config["default_ticker"] else None
+        # )
+        self._ticker = yf.Ticker("AAPL")
         self._last_output = None
 
     def console_output(self, df: pd.DataFrame):
@@ -124,41 +132,38 @@ class MainCLI(cmd.Cmd):
         """
         View, edit or reset the configuration file to default.
         Usage:
-        config (<setting_name>) (<value>)
+        config (<setting>) (<value>)
         config reset
         """
         args = line.strip().split()
         global config
 
-        # No arguments, print config file
         if not args:
             console.print(config)
             return
 
-        if args[0] in config:
-            if len(args) > 1:
-                config[args[0]] = args[1]
+        setting = args[0]
 
-                # Write to config.json
+        if setting in config:
+            if len(args) > 1:
+                value = type_eval(args[1])
+                config[setting] = value
+
                 with open(CONFIG_PATH, "w") as f:
                     json.dump(config, f, indent=2)
 
-                # Reload config.json
                 config = init_config(CONFIG_PATH)
+                console.print(f"'{setting}' is now set to: '{value}'")
 
-                console.print(f"'{args[0]}' is now set to: '{args[1]}'")
             else:
-                console.print(f"'{args[0]}' is currently set to: '{config[args[0]]}'")
+                console.print(f"'{setting}' is currently set to: '{config[setting]}'")
 
-        elif args[0] == "reset":
+        elif setting == "reset":
 
-            # Write to config.json from DEFAULT_CONFIG in config.py
             with open(CONFIG_PATH, "w") as f:
                 json.dump(DEFAULT_CONFIG, f, indent=2)
 
-            # Reload config.json
             config = init_config(CONFIG_PATH)
-
             console.print(f"Configuration file has been reset to default settings.")
 
         else:
@@ -203,7 +208,7 @@ class MainCLI(cmd.Cmd):
 
         # Build filename with extension and get export path
         filename = Path(filename).with_suffix(".csv")
-        export_path = BASE_PATH / config["EXPORT_FOLDER"]
+        export_path = BASE_PATH / config["export_folder"]
 
         # Build the base path for the file
         filepath = export_path / filename
@@ -414,7 +419,7 @@ class MainCLI(cmd.Cmd):
         # Get hv data
         try:
             hv_df, hv_realized = hv(
-                self._ticker, method, period, config["HV_ROLLING_WINDOWS"]
+                self._ticker, method, period, config["hv_rolling_windows"]
             )
         except ValueError as e:
             console_error(e)
@@ -440,9 +445,9 @@ class MainCLI(cmd.Cmd):
         Usage:
         iv <surface|skew> (expiration)
         Flags:
-        res: resolution of volatility surface plot.
-        range: percent range around spot price for strikes of volatility surface plot.
-        cmap: colormap of volatility surface plot.
+        --res <int>     : resolution of volatility surface plot.
+        --range <float> : percent range around spot price for strikes of volatility surface plot.
+        --cmap <str>    : colormap of volatility surface plot.
         """
         command = "iv"
         args, flags = parse_line(line)
@@ -451,26 +456,20 @@ class MainCLI(cmd.Cmd):
         expiration = args[1] if len(args) > 1 else ""
 
         if subcmd == "surface":
-            # Check flags and revert to default is none used
+            # Handle Flags
             try:
-                res = int(flags.get("res", config["IV_SURFACE_RESOLUTION"]))
-                strike_range = float(
-                    flags.get("range", config["IV_SURFACE_STRIKE_RANGE"])
-                )
-                cmap = str(flags.get("cmap", config["IV_SURFACE_CMAP"]))
-
+                res = int(flags.get("--res", config["iv_surface_res"]))
+                strike_range = float(flags.get("--range", config["iv_surface_range"]))
+                cmap = str(flags.get("--cmap", config["iv_surface_res"]))
             except Exception as e:
                 console_error(e)
                 return
 
             try:
-                # Fetch and print IV surface dataframe
+                # Get IV surface dataframe
                 df = iv_surface(self._ticker)
                 self.console_output(df)
-
-                # Plot IV surface dataframe automatically
                 plot_iv_surface(df, self._ticker, strike_range, res, cmap)
-
             except ValueError as e:
                 console_error(e)
 
@@ -518,16 +517,18 @@ class MainCLI(cmd.Cmd):
         Plot the specified or all columns of the last output if it is a DataFrame against a specified index.
         Usage:
         plot <index> <column(s)| all>
-        plot surface
         Flags:
-        title: title of plot
-        xlabel: label of x-axis
-        ylabel: label of y-axis
+        --title <str>   : title of plot
+        --xlabel <str>  : label of x-axis
+        --ylabel <str>  : label of y-axis
+        -grid           : enable background grid
+        -legend         : enable legend (automatically enabled when plotting two or more columns)
         """
 
         df = self._last_output
-        columns, flags = parse_line(line)
-        index = columns[0]
+        args, flags = parse_line(line)
+        index = args[0]
+        args.remove(index)
 
         # Check that last output is a dataframe / exists
         if not isinstance(df, pd.DataFrame):
@@ -553,11 +554,13 @@ class MainCLI(cmd.Cmd):
             return
 
         # Plot all columns if 'all'
-        if columns[1] == "all":
-            columns = [col for col in df.columns if col != index]
+        if args[0] == "all":
+            columns = list(df.columns[df.columns != index])
+        else:
+            columns = args
 
         # Plot columns
-        for column in columns[1:]:
+        for column in columns:
             try:
                 ax.plot(series, df[column], label=column)
             except KeyError as e:
@@ -576,18 +579,20 @@ class MainCLI(cmd.Cmd):
         if len(df) > 20:
             plt.xticks(rotation=45, ha="right")
 
-        if len(columns) > 2:
-            plt.legend()
-
         # Handle flags
         try:
-            title = flags.get("title", f"{self._ticker.ticker} {columns[1:]}")
-            xlabel = flags.get("xlabel", index.title())
-            ylabel = flags.get("ylabel", "")
+            title = str(flags.get("--title", f"{self._ticker.ticker} {columns}"))
+            xlabel = str(flags.get("--xlabel", index.title()))
+            ylabel = str(flags.get("--ylabel", ""))
+            grid = flags.get("-grid", config["plot_grid"])
+            legend = flags.get("-legend", config["plot_legend"])
         except ValueError as e:
             console_error(e)
             return
 
+        if legend:
+            plt.legend()
+        ax.grid(grid)
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -596,6 +601,5 @@ class MainCLI(cmd.Cmd):
         plt.show()
 
 
-# Run CLI
 if __name__ == "__main__":
     MainCLI().cmdloop()
