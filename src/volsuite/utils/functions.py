@@ -33,11 +33,8 @@ def parse_line(line: str):
         args: A list of string arguments.
         flags: A dictionary mapping flags (substring to the left of '=') to their value (substring to the right of '=').
     """
-    tokens = line.strip()
-    try:
-        tokens = shlex.split(tokens)
-    except ValueError as e:
-        console_error(e)
+    tokens = shlex.split(line)
+
     if not tokens:
         return [], {}
 
@@ -88,9 +85,30 @@ def console_error(error: Exception):
 
 def type_eval(s: str):
     """
-    Evaluate string with type conversion to int, float, bool or list.
+    Evaluate string with type conversion to int, float, bool or list if possible.
 
     Args:
         s: String to be converted
     """
-    pass
+    if not isinstance(s, str):
+        return s
+
+    # Evaluate list-like
+    if s.startswith("[") and s.endswith("]"):
+        return [type_eval(i) for i in s[1:-1].split(",")]
+
+    # Evaluate numberic
+    try:
+        n = float(s)
+        if n % 1 == 0:
+            return int(n)
+        else:
+            return n
+    except:
+        pass
+
+    map = {"true": True, "false": False, "none": None}
+    if s.lower() in map:
+        return map[s.lower()]
+    else:
+        return s

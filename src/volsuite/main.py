@@ -47,10 +47,7 @@ config = init_config(CONFIG_PATH)
 
 # Verify existence of default ticker if specified on startup
 if config["default_ticker"]:
-    try:
-        yf.Ticker(config["default_ticker"]).fast_info["lastPrice"]
-        pass
-    except:
+    if yf.Ticker(config["default_ticker"]).history(period="1d", interval="1m").empty:
         console.print(
             f"[red]Error: Unable to fetch data for symbol '{config["default_ticker"]}' from yfinance API. Check your connection and/or that the symbol exists."
         )
@@ -83,10 +80,11 @@ class MainCLI(cmd.Cmd):
 
     def __init__(self):
         super().__init__()
-        # self._ticker = (
-        #     yf.Ticker(config["default_ticker"]) if config["default_ticker"] else None
-        # )
-        self._ticker = yf.Ticker("AAPL")
+        self._ticker = (
+            None
+            if not config["default_ticker"]
+            else yf.Ticker(config["default_ticker"])
+        )
         self._last_output = None
 
     def console_output(self, df: pd.DataFrame):
@@ -135,7 +133,11 @@ class MainCLI(cmd.Cmd):
         config (<setting>) (<value>)
         config reset
         """
-        args = line.strip().split()
+        try:
+            args, flags = parse_line(line)
+        except ValueError as e:
+            console_error(e)
+            return
         global config
 
         if not args:
@@ -208,7 +210,7 @@ class MainCLI(cmd.Cmd):
 
         # Build filename with extension and get export path
         filename = Path(filename).with_suffix(".csv")
-        export_path = BASE_PATH / config["export_folder"]
+        export_path = BASE_PATH / str(config["export_folder"])
 
         # Build the base path for the file
         filepath = export_path / filename
@@ -257,12 +259,14 @@ class MainCLI(cmd.Cmd):
             line = line.upper()
             console.print(f"Downloading ticker symbol [purple]'${line}'[/purple]...")
             if yf.Ticker(line).history(period="1d", interval="1m").empty:
-                pass
+                console.print(
+                    f"[red]Error: Unable to fetch data for symbol '{config["default_ticker"]}' from yfinance API. Check your connection and/or that the symbol exists."
+                )
             else:
-                self._ticker = yf.Ticker(line)
                 console.print(
                     f"[green]Ticker symbol '[purple]${line}[/purple]' successfully loaded."
                 )
+            self._ticker = yf.Ticker(line)
 
     @requires_ticker
     @requires_min_args(1)
@@ -275,7 +279,11 @@ class MainCLI(cmd.Cmd):
         history <startdate> <enddate>
         """
         command = "history"
-        args, flags = parse_line(line)
+        try:
+            args, flags = parse_line(line)
+        except ValueError as e:
+            console_error(e)
+            return
 
         # Handle time period
         if args[0] in VALID_PERIODS:
@@ -341,7 +349,12 @@ class MainCLI(cmd.Cmd):
         oc <expiration date> calls|puts
         """
         command = "oc"
-        args, flags = parse_line(line)
+        try:
+            args, flags = parse_line(line)
+        except ValueError as e:
+            console_error(e)
+            return
+
         if args:
             expiration = args[0]
         else:
@@ -392,7 +405,11 @@ class MainCLI(cmd.Cmd):
         hv <method> <time period>
         """
         command = "hv"
-        args, flags = parse_line(line)
+        try:
+            args, flags = parse_line(line)
+        except ValueError as e:
+            console_error(e)
+            return
         method = args[0]
 
         # Time period in period format
@@ -450,7 +467,11 @@ class MainCLI(cmd.Cmd):
         --cmap <str>    : colormap of volatility surface plot.
         """
         command = "iv"
-        args, flags = parse_line(line)
+        try:
+            args, flags = parse_line(line)
+        except ValueError as e:
+            console_error(e)
+            return
         subcmd = args[0]
 
         expiration = args[1] if len(args) > 1 else ""
@@ -526,7 +547,12 @@ class MainCLI(cmd.Cmd):
         """
 
         df = self._last_output
-        args, flags = parse_line(line)
+        try:
+            args, flags = parse_line(line)
+        except ValueError as e:
+            console_error(e)
+            return
+
         index = args[0]
         args.remove(index)
 
