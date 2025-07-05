@@ -88,7 +88,7 @@ def type_eval(s: str):
     Evaluate string with type conversion to int, float, bool or list if possible.
 
     Args:
-        s: String to be converted
+        s: String to be converted.
     """
     if not isinstance(s, str):
         return s
