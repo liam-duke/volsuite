@@ -481,7 +481,7 @@ class MainCLI(cmd.Cmd):
             try:
                 res = int(flags.get("--res", config["iv_surface_res"]))
                 strike_range = float(flags.get("--range", config["iv_surface_range"]))
-                cmap = str(flags.get("--cmap", config["iv_surface_res"]))
+                cmap = str(flags.get("--cmap", config["iv_surface_cmap"]))
             except Exception as e:
                 console_error(e)
                 return
