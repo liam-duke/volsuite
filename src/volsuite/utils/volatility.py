@@ -73,7 +73,7 @@ def hv(ticker: yf.Ticker, method: str, timeperiod, windows: list):
 
     else:
         raise ValueError(
-            f"'{method}' is not recognized as a valid method. Use 'close', 'parkinson' or 'gk'."
+            f"'{method}' is not recognized as a valid method. Use 'close', 'parkinson' or 'gk'"
         )
 
     # Include metadata for export
