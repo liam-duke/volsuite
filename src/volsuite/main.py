@@ -1,5 +1,3 @@
-# External libraries
-# ----------------
 from datetime import datetime
 from pathlib import Path
 from rich.console import Console
@@ -9,11 +7,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import yfinance as yf
-from ast import literal_eval
 
-
-# Internal libraries
-# ----------------
 from volsuite.utils.config import DEFAULT_CONFIG, init_config
 from volsuite.utils.decorators import (
     catch_network_error,
@@ -31,23 +25,16 @@ from volsuite.utils.functions import (
 from volsuite.utils.volatility import hv, iv_skew, iv_surface, plot_iv_surface
 
 
-# Program initialization
-# ----------------
-
-version = "0.10"
 BASE_PATH = get_base_path()
-
-# Initialize rich printing
-console = Console()
-
-# Initialize config.json
 CONFIG_PATH = BASE_PATH / "config.json"
 
+version = "0.10"
+console = Console()
 config = init_config(CONFIG_PATH)
 
 # Verify existence of default ticker if specified on startup
 if config["default_ticker"]:
-    if yf.Ticker(config["default_ticker"]).history(period="1d", interval="1m").empty:
+    if yf.Ticker(config["default_ticker"]).history(period="1d").empty:
         console.print(
             f"[red]Error: Unable to fetch data for symbol '{config["default_ticker"]}' from yfinance API. Check your connection and/or that the symbol exists."
         )
@@ -57,7 +44,6 @@ pd.set_option(
     "display.max_rows",
     None if int(config["display_max_rows"]) == 0 else int(config["display_max_rows"]),
 )
-
 pd.set_option(
     "display.max_colwidth",
     (
@@ -68,14 +54,11 @@ pd.set_option(
 )
 
 
-# Program loop
-# ----------------
 class MainCLI(cmd.Cmd):
     """
     Main CLI class which stores all session data and available commands.
     """
 
-    # Program startup message
     intro = f"Welcome to VolSuite v{version}. Enter 'ticker <symbol>' or 'help' to get started."
 
     def __init__(self):
@@ -150,22 +133,54 @@ class MainCLI(cmd.Cmd):
             if len(args) > 1:
                 value = type_eval(args[1])
                 config[setting] = value
-
                 with open(CONFIG_PATH, "w") as f:
                     json.dump(config, f, indent=2)
-
                 config = init_config(CONFIG_PATH)
+
+                pd.set_option(
+                    "display.max_rows",
+                    (
+                        None
+                        if int(config["display_max_rows"]) == 0
+                        else int(config["display_max_rows"])
+                    ),
+                )
+                pd.set_option(
+                    "display.max_colwidth",
+                    (
+                        None
+                        if int(config["display_max_colwidth"]) == 0
+                        else int(config["display_max_colwidth"])
+                    ),
+                )
+
                 console.print(f"'{setting}' is now set to: '{value}'")
 
             else:
                 console.print(f"'{setting}' is currently set to: '{config[setting]}'")
 
         elif setting == "reset":
-
             with open(CONFIG_PATH, "w") as f:
                 json.dump(DEFAULT_CONFIG, f, indent=2)
-
             config = init_config(CONFIG_PATH)
+
+            pd.set_option(
+                "display.max_rows",
+                (
+                    None
+                    if int(config["display_max_rows"]) == 0
+                    else int(config["display_max_rows"])
+                ),
+            )
+            pd.set_option(
+                "display.max_colwidth",
+                (
+                    None
+                    if int(config["display_max_colwidth"]) == 0
+                    else int(config["display_max_colwidth"])
+                ),
+            )
+
             console.print(f"Configuration file has been reset to default settings.")
 
         else:
@@ -269,6 +284,25 @@ class MainCLI(cmd.Cmd):
             self._ticker = yf.Ticker(line)
 
     @requires_ticker
+    @catch_network_error
+    def do_news(self, line):
+        """
+        Print recent news for specified ticker.
+        Usage:
+        news
+        """
+        news = self._ticker.news
+        print()
+        for article in news:
+            content = article["content"]
+            title = content["title"]
+            provider = content["provider"]["displayName"]
+            summary = content["summary"]
+            url = content["canonicalUrl"]["url"]
+            console.print(f"[bold]{provider} — {title}[/bold]\n{summary}\n{url}")
+            print()
+
+    @requires_ticker
     @requires_min_args(1)
     @catch_network_error
     def do_history(self, line):
@@ -287,12 +321,12 @@ class MainCLI(cmd.Cmd):
 
         # Handle time period
         if args[0] in VALID_PERIODS:
-
             # Time interval also provided
             if len(args) > 1:
                 if args[1] in VALID_INTERVALS:
-                    df = self._ticker.history(period=args[0], interval=args[1])
-
+                    df = self._ticker.history(
+                        period=args[0], interval=args[1]
+                    ).reset_index()
                     # Metadata for export
                     df.attrs["period"] = f"{args[0]}_{args[1]}"
                 else:
@@ -309,7 +343,6 @@ class MainCLI(cmd.Cmd):
 
         # Handle date interval
         elif is_date(args[0]):
-
             # End date provided
             if len(args) > 1:
                 try:
@@ -318,14 +351,12 @@ class MainCLI(cmd.Cmd):
                 except ValueError as e:
                     console_error(e)
                     return
-
             # No end date provided
             else:
                 console.print(
                     f"[red]Error: Missing end date. Use date format '%Y-%m-%d'."
                 )
                 return
-
         # No valid time period or date
         else:
             console.print(
@@ -540,6 +571,7 @@ class MainCLI(cmd.Cmd):
         plot <index> <column(s)| all>
         Flags:
         --title <str>   : title of plot
+        --style <str>   : style of plot (https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html)
         --xlabel <str>  : label of x-axis
         --ylabel <str>  : label of y-axis
         -grid           : enable background grid
@@ -564,6 +596,14 @@ class MainCLI(cmd.Cmd):
         # Check that dataframe is not empty
         if df.empty:
             console.print(f"[red]Error: DataFrame '{df}' is empty, cannot plot.")
+            return
+
+        # Handle plot style
+        try:
+            style = str(flags.get("--style", config["plot_style"]))
+            plt.style.use(style)
+        except (ValueError, OSError) as e:
+            console_error(e)
             return
 
         plt.figure(figsize=(10, 5))

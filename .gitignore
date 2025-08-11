@@ -214,3 +214,4 @@ __marimo__/
 # Volsuite specific files
 src/volsuite/exports
 src/volsuite/config.json
+_.py

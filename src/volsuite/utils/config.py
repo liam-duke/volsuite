@@ -7,7 +7,7 @@ console = Console()
 # Default configuration settings
 
 DEFAULT_CONFIG = {
-    "default_ticker": None,
+    "default_ticker": "",
     "export_folder": "exports",
     "hv_rolling_windows": [5, 10, 20, 50],
     "iv_surface_cmap": "jet",
@@ -15,8 +15,9 @@ DEFAULT_CONFIG = {
     "iv_surface_res": 25,
     "plot_grid": False,
     "plot_legend": False,
-    "display_max_rows": 0,
-    "display_max_colwidth": 0,
+    "plot_style": "default",
+    "display_max_rows": 50,
+    "display_max_colwidth": 50,
 }
 
 
