@@ -20,7 +20,7 @@ Let's say I want to retrieve a list of historial prices of Apple Inc. ($AAPL) ov
 ticker aapl
 ```
 
-Next, I run the following command to print a table (formatted as a pandas dataframe) of historical summary data for the past year:
+Next, I run the following command to print a dataframe of historical summary data for the past year:
 
 ```
 history 1y
