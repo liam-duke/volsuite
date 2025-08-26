@@ -1,6 +1,6 @@
 # VolSuite
 
-VolSuite is a python-based CLI tool designed for intuitive equity data retrieval and analysis. VolSuite enables users to quickly fetch historical ticker data and current option chains via yahoo finance. Additionally supports rolling realized volatility computation and visualization; volatility surface and skew modeling; configurable user settings with session persistence and data import/export capabilities.
+VolSuite is a python-based CLI tool designed for intuitive equity data retrieval and analysis, enabling users to quickly fetch historical ticker data and current option chains via yahoo finance. Additionally supports rolling realized volatility computation and visualization; volatility surface and skew modeling; configurable user settings with session persistence and data import/export capabilities.
 
 ## Running commands
 
