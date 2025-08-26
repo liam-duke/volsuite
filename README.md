@@ -29,7 +29,7 @@ history 1y
 Now that I have my dataframe, I want to plot the high and low prices by date. To do so I type the following:
 
 ```
-plot date high low --title="AAPL High-Low Prices 1y" ylabel=Price_(USD)
+plot date high low --title="AAPL High-Low Prices 1y" --ylabel="Price (USD)"
 ```
 
 Where date is my index (x-axis) and everything after is taken as a column to graph or a flag (recognized by a '=' in the argument). Now that I have my graph, I want to export the data for later use. I do so with the following command:
