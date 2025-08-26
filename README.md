@@ -14,7 +14,7 @@ Upon first running, VolSuite will create a default config.json file in the same 
 
 ### Historical price modeling:
 
-Let's say I want to retrieve a list of historial prices of Apple Inc. ($AAPL) over the past year. First I run the following command to select the ticker 'AAPL' and connect to the yfinance API:
+Let's say I want to retrieve a list of historial prices of Apple Inc. ($AAPL) over the past year. First I run the following command to connect to the yfinance API and select the ticker 'AAPL':
 
 ```
 ticker aapl
