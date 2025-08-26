@@ -32,29 +32,29 @@ Now that I have my dataframe, I want to plot the high and low prices by date. To
 plot date high low --title="AAPL High-Low Prices 1y" --ylabel="Price (USD)"
 ```
 
-Where date is my index (x-axis) and everything after is taken as a column to graph or a flag (recognized by a '=' in the argument). Now that I have my graph, I want to export the data for later use. I do so with the following command:
+Where 'date' is my index and everything after is taken as a column to graph or a flag (indicated by the use of '-' or '--'). Now that I have my graph, I want to export the data for later use. I do so with the following command:
 
 ```
 export
 ```
 
-Because no filename was provided, VolSuite automatically generated one for me, 'AAPL_history_1mo.csv'. If I wanted to import the same dataframe in a later session, I could use the import command as follows:
+Because no filename was provided, VolSuite will automatically generate one for me, 'AAPL_history_1mo.csv'. If I wanted to import the same dataframe in a later session, I could use the import command as follows:
 
 ```
 import exports/AAPL_history_1mo.csv
 ```
 
-Whenever a dataframe is loaded, via a command or import, it will be saved to the cache and referenced for any following commands until a new dataframe is loaded. 'import' will always search for the specified path in the same directory as the executable.
+Whenever a dataframe is loaded, via a command or import, it will be saved to the cache and referenced for any following commands until a new dataframe is loaded either via import or yFinance. 'import' will always search for the specified path in the same directory as the executable.
 
 ### Option chains:
 
-To view the current call option chain expiring 2025-07-18 for $AAPL, I can type:
+To view the current call option chain for $AAPL with expiry 2025-07-18, I can type:
 
 ```
 oc 2025-07-18 calls
 ```
 
-If I want to view puts, I would replace 'calls' with 'puts'.
+To view puts, I would replace 'calls' with 'puts'.
 
 ### Volatility modeling:
 
@@ -70,7 +70,7 @@ With this dataframe, I can now create my plot by typing:
 plot date all
 ```
 
-If I instead wish to view implied volatility data, I can use the following to fetch and plot the current volatility skew for $AAPL for the expiration 2025-07-18:
+If I instead wish to view implied volatility data, I can use the following to fetch and plot the current volatility skew of $AAPL options with expiration 2025-07-18:
 
 ```
 iv skew 2025-07-18
@@ -82,4 +82,4 @@ And the following to get the current volatility surface, which is also plotted a
 iv surface
 ```
 
-> Note: Implied volatilites are currently retrieved from yfinance, and filtered by only referencing OTM options.
+> Note: Implied volatilites are currently retrieved from yfinance, and filtered by OTM options.
