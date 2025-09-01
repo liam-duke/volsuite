@@ -10,6 +10,8 @@ VolSuite is a CLI tool, meaning that all user interaction is done through the te
 
 Upon first running, VolSuite will create a default config.json file in the same directory as the executable. This file can be modified directly by the user or through the CLI by using the `config` command.
 
+![volsuite preview](https://raw.githubusercontent.com/liam-duke/volsuite/refs/heads/main/assets/preview.png)
+
 ## Installation
 
 ### Quick Install:
