@@ -25,7 +25,6 @@ def hv(ticker: yf.Ticker, method: str, timeperiod, windows: list):
     Raises:
         ValueError: An unexpected method is taken in by the function.
     """
-
     # Fetch price data
     if isinstance(timeperiod, tuple):
         df = ticker.history(start=timeperiod[0], end=timeperiod[1])
@@ -76,7 +75,7 @@ def hv(ticker: yf.Ticker, method: str, timeperiod, windows: list):
             f"'{method}' is not recognized as a valid method. Use 'close', 'parkinson' or 'gk'"
         )
 
-    # Include metadata for export
+    # Include metadata
     hv_df.attrs["ticker"] = ticker.ticker
     hv_df.attrs["period"] = period
     hv_df.attrs["datatype"] = f"hv_{method}"
@@ -95,7 +94,6 @@ def iv_skew(ticker: yf.Ticker, expiration: str = ""):
     Returns:
         A dataframe of implied volatilities at each strike for the given expiration.
     """
-
     # Fetch option chains
     calls = ticker.option_chain(expiration).calls
     puts = ticker.option_chain(expiration).puts
@@ -113,7 +111,7 @@ def iv_skew(ticker: yf.Ticker, expiration: str = ""):
     )
     iv_df = iv_df.dropna()
 
-    # Include metadata in dataframe for export
+    # Include metadata
     iv_df.attrs["ticker"] = ticker.ticker
     iv_df.attrs["period"] = expiration
     iv_df.attrs["datatype"] = "iv_skew"
@@ -131,7 +129,6 @@ def iv_surface(ticker: yf.Ticker):
     Returns:
         A dataframe of implied volatilites for each strike at every expiration available.
     """
-
     # Get expirations and today's date for time to expiry
     expirations = ticker.options
     current_date = pd.Timestamp(datetime.today())
@@ -151,13 +148,10 @@ def iv_surface(ticker: yf.Ticker):
             otm["spot"] = ticker.fast_info["lastPrice"]
             options.append(otm)
 
-    # Concatenate all expiration data
     iv_surface_df = pd.concat(options, ignore_index=True)
-
-    # Create moneyness column
     iv_surface_df["moneyness"] = iv_surface_df["strike"] / iv_surface_df["spot"]
 
-    # Include metadata for export
+    # Include metadata
     iv_surface_df.attrs["ticker"] = ticker.ticker
     iv_surface_df.attrs["period"] = str(date.today())
     iv_surface_df.attrs["datatype"] = "iv_surface"
@@ -182,8 +176,6 @@ def plot_iv_surface(
         res: Resolution of surface, represents length of square meshgrid.
         cmap: Colormap to use for surface plotting.
     """
-
-    # Get spot price from dataframe
     spot = iv_surface_df["spot"].iloc[0]
 
     # Filter iv surface df by strike range
