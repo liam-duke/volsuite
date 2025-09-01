@@ -432,8 +432,8 @@ class MainCLI(cmd.Cmd):
         """
         Print historical rolling volatility model given a specified method and time period. Supports close-to-close, garman-klass and parkinson volatility computations.
         Usage:
-        hv <close | gk | parkinson> <startdate enddate>
-        hv <close | gk | parkinson> <time period>
+        hv <close|gk|parkinson> <startdate enddate>
+        hv <close|gk|parkinson> <time period>
         """
         command = "hv"
         try:
