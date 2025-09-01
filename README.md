@@ -118,4 +118,4 @@ iv surface
 
 ## License
 
-This project is licensed under the MIT License. `See volsuite/LICENSE` for details.
+This project is licensed under the MIT License. See 'volsuite/LICENSE` for details.
