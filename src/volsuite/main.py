@@ -430,10 +430,10 @@ class MainCLI(cmd.Cmd):
     @catch_network_error
     def do_hv(self, line):
         """
-        Print historical rolling volatility model given a specified method and time period.
+        Print historical rolling volatility model given a specified method and time period. Supports close-to-close, garman-klass and parkinson volatility computations.
         Usage:
-        hv <method> <startdate enddate>
-        hv <method> <time period>
+        hv <close | gk | parkinson> <startdate enddate>
+        hv <close | gk | parkinson> <time period>
         """
         command = "hv"
         try:
