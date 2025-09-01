@@ -6,9 +6,40 @@ VolSuite is a python-based CLI tool designed for intuitive equity data retrieval
 
 VolSuite is a CLI tool, meaning that all user interaction is done through the terminal/command prompt window. In order to perform an action, a line should begin with a base command followed by its necessary arguments and optional flags – a full list of available commands and their arguments can be viewed by typing 'help (\<command\>)'. Commands which retrieve data will require a ticker to be specified by the user when running, this can be done by typing 'ticker \<symbol\>'.
 
-> Note: Flags are optional arguments which can be used to configure the output of some commands. They are formatted as '\--<flag\>=\<value\>'.
+> Note: Flags are optional arguments which can be used to configure the output of some commands. They are formatted as '--\<flag\>=\<value\>' for parametric flags and '-\<flag\>' for boolean flags.
 
-Upon first running, VolSuite will create a default config.json file in the same directory as the executable. This file can be modified directly by the user or from within the CLI by using the 'config' command.
+Upon first running, VolSuite will create a default config.json file in the same directory as the executable. This file can be modified directly by the user or through the CLI by using the 'config' command.
+
+## Installation
+
+### Quick Install:
+To install the standalone executable [get the latest release from GitHub](https://github.com/liam-duke/volsuite/releases).
+
+### Developer Setup:
+To install and run the source code as a python module:
+
+```
+git clone https://github.com/liam-duke/volsuite.git
+cd volsuite
+
+# Optional virtual environment setup
+python -m venv .venv
+source .venv/bin/activate   # MacOS/Linux
+.venv\scripts\activate        # Windows
+
+pip install -r requirements.txt
+cd src
+python -m volsuite.main
+```
+
+To build a local executable in with PyInstaller, ensure that you are in the project root folder and:
+
+```
+pip install pyinstaller
+python build.py
+```
+
+The executable can be found in the dist/ folder.
 
 ## Example usage
 
@@ -32,7 +63,7 @@ Now that I have my dataframe, I want to plot the high and low prices by date. To
 plot date high low --title="AAPL High-Low Prices 1y" --ylabel="Price (USD)"
 ```
 
-Where 'date' is my index and everything after is taken as a column to graph or a flag (indicated by the use of '-' or '--'). Now that I have my graph, I want to export the data for later use. I do so with the following command:
+Where 'date' is my index and everything after is taken as a column to graph or flag. Now that I have my graph, I want to export the data for later use. I do so with the following command:
 
 ```
 export
@@ -46,7 +77,7 @@ import exports/AAPL_history_1mo.csv
 
 Whenever a dataframe is loaded, via a command or import, it will be saved to the cache and referenced for any following commands until a new dataframe is loaded either via import or yFinance. 'import' will always search for the specified path in the same directory as the executable.
 
-### Option chains:
+### Option chain retrieval:
 
 To view the current call option chain for $AAPL with expiry 2025-07-18, I can type:
 
