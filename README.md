@@ -114,6 +114,8 @@ And the following to get the current volatility surface, which is also plotted a
 iv surface
 ```
 
-> Note: Implied volatilites are currently retrieved from yfinance, and filtered by OTM prices.
+> Implied volatilites are currently retrieved from yfinance and filtered by OTM prices.
+
+## License
 
 This project uses the MIT License.
