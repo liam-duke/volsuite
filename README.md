@@ -115,3 +115,7 @@ iv surface
 ```
 
 > Note: Implied volatilites are currently retrieved from yfinance, and filtered by OTM prices.
+
+## License
+
+VolSuite uses the MIT License.
