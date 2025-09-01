@@ -77,15 +77,10 @@ class MainCLI(cmd.Cmd):
         Args:
             df: Dataframe object to be printed.
         """
-
-        # Remove whitespace and capitalization from column titles of dataframes for easier access when plotting
         if isinstance(df, pd.DataFrame):
             df = df.rename(columns=lambda x: x.replace(" ", "").lower())
-
-        # Cache dataframe
         self._last_output = df
 
-        # Print dataframe
         print()
         console.print(df)
         print()
@@ -122,13 +117,11 @@ class MainCLI(cmd.Cmd):
             console_error(e)
             return
         global config
-
         if not args:
             console.print(config)
             return
 
         setting = args[0]
-
         if setting in config:
             if len(args) > 1:
                 value = type_eval(args[1])
@@ -153,9 +146,7 @@ class MainCLI(cmd.Cmd):
                         else int(config["display_max_colwidth"])
                     ),
                 )
-
                 console.print(f"'{setting}' is now set to: '{value}'")
-
             else:
                 console.print(f"'{setting}' is currently set to: '{config[setting]}'")
 
@@ -163,7 +154,6 @@ class MainCLI(cmd.Cmd):
             with open(CONFIG_PATH, "w") as f:
                 json.dump(DEFAULT_CONFIG, f, indent=2)
             config = init_config(CONFIG_PATH)
-
             pd.set_option(
                 "display.max_rows",
                 (
@@ -180,7 +170,6 @@ class MainCLI(cmd.Cmd):
                     else int(config["display_max_colwidth"])
                 ),
             )
-
             console.print(f"Configuration file has been reset to default settings.")
 
         else:
@@ -210,27 +199,20 @@ class MainCLI(cmd.Cmd):
         Save the last printed DataFrame to a CSV file inside the export folder. Builds a default filename if none provided.
         Usage: export (<filename>)
         """
-        # Load dataframe from cache
         df = self._last_output
 
         if df is None:
             console.print("[red]Error: No cached data to export.")
             return
-
-        # Build default filename if none provided
         if not filename:
             filename = (
                 f"{df.attrs['ticker']}_{df.attrs['datatype']}_{df.attrs['period']}"
             )
 
-        # Build filename with extension and get export path
+        # Build filepath
         filename = Path(filename).with_suffix(".csv")
         export_path = BASE_PATH / str(config["export_folder"])
-
-        # Build the base path for the file
         filepath = export_path / filename
-
-        # Create the export directory if it doesn't exist
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
         # Save dataframe to CSV
@@ -263,13 +245,11 @@ class MainCLI(cmd.Cmd):
         Usage:
         ticker (<symbol>)
         """
-        # No ticker specified, default print current ticker
         if line == "":
             console.print(
                 f"Current ticker is set to: [purple]${self._ticker.ticker if self._ticker else None}[/purple]."
             )
 
-        # Ticker specified, download and update if available
         else:
             line = line.upper()
             console.print(f"Downloading ticker symbol [purple]'${line}'[/purple]...")
@@ -321,29 +301,26 @@ class MainCLI(cmd.Cmd):
 
         # Handle time period
         if args[0] in VALID_PERIODS:
-            # Time interval also provided
             if len(args) > 1:
                 if args[1] in VALID_INTERVALS:
                     df = self._ticker.history(
                         period=args[0], interval=args[1]
                     ).reset_index()
-                    # Metadata for export
+                    # Include metadata
                     df.attrs["period"] = f"{args[0]}_{args[1]}"
                 else:
                     console.print(
                         f"[red]Error: Invalid time interval '{args[1]}'. Use {VALID_INTERVALS}."
                     )
                     return
-            # Time interval not provided
             else:
                 df = self._ticker.history(period=args[0]).reset_index()
 
-                # Metadata for export
+                # Include metadata
                 df.attrs["period"] = f"{args[0]}"
 
         # Handle date interval
         elif is_date(args[0]):
-            # End date provided
             if len(args) > 1:
                 try:
                     df = self._ticker.history(start=args[0], end=args[1]).reset_index()
@@ -351,13 +328,12 @@ class MainCLI(cmd.Cmd):
                 except ValueError as e:
                     console_error(e)
                     return
-            # No end date provided
             else:
                 console.print(
                     f"[red]Error: Missing end date. Use date format '%Y-%m-%d'."
                 )
                 return
-        # No valid time period or date
+
         else:
             console.print(
                 f"[red]Error: '{args[0]}' is not recognized as a valid time period or date. Use {VALID_PERIODS} or date format '$Y-$m-$d'."
@@ -368,7 +344,6 @@ class MainCLI(cmd.Cmd):
         df.attrs["ticker"] = self._ticker.ticker
         df.attrs["datatype"] = command
 
-        # Print data
         self.console_output(df)
 
     @requires_ticker
@@ -391,11 +366,9 @@ class MainCLI(cmd.Cmd):
         else:
             expiration = ""
 
-        # Handle expiration date
         try:
             chain = self._ticker.option_chain(expiration)
 
-            # Handle option type
             if len(args) > 1:
                 if args[1] == "calls":
                     df = chain.calls
@@ -407,7 +380,6 @@ class MainCLI(cmd.Cmd):
                     )
                     return
 
-            # Option type not specified
             else:
                 console.print("[red]Error: Missing option type. Use 'calls' or 'puts'.")
                 return
@@ -417,7 +389,6 @@ class MainCLI(cmd.Cmd):
             df.attrs["period"] = expiration
             df.attrs["datatype"] = f"{command}_{args[0]}"
 
-            # Print data
             self.console_output(df)
 
         # Catch invalid date format and print available expirations
@@ -442,12 +413,9 @@ class MainCLI(cmd.Cmd):
             console_error(e)
             return
         method = args[0]
-
-        # Time period in period format
         if args[1] in VALID_PERIODS:
             period = args[1]
 
-        # Time period in startdate enddate format
         elif is_date(args[1]):
             if len(args) > 2:
                 period = (args[1], args[2])
@@ -457,14 +425,12 @@ class MainCLI(cmd.Cmd):
                 )
                 return
 
-        # Catch invalid time period
         else:
             console.print(
                 f"[red]Error: '{args[1]}' is not recognized as a valid time period or date. Use {VALID_PERIODS} or date format '$Y-$m-$d'."
             )
             return
 
-        # Get hv data
         try:
             hv_df, hv_realized = hv(
                 self._ticker, method, period, config["hv_rolling_windows"]
@@ -473,14 +439,13 @@ class MainCLI(cmd.Cmd):
             console_error(e)
             return
 
-        # Include metadata in DataFrame
+        # Include metadata
         hv_df.attrs["ticker"] = self._ticker.ticker
         hv_df.attrs["period"] = (
             f"{period[0]}" if args[1] in VALID_PERIODS else f"{period[0]}_{period[1]}"
         )
         hv_df.attrs["datatype"] = command
 
-        # Print data
         self.console_output(hv_df)
         console.print(f"Realized Volatility: {hv_realized}\n")
 
@@ -504,11 +469,9 @@ class MainCLI(cmd.Cmd):
             console_error(e)
             return
         subcmd = args[0]
-
         expiration = args[1] if len(args) > 1 else ""
 
         if subcmd == "surface":
-            # Handle Flags
             try:
                 res = int(flags.get("--res", config["iv_surface_res"]))
                 strike_range = float(flags.get("--range", config["iv_surface_range"]))
@@ -516,30 +479,23 @@ class MainCLI(cmd.Cmd):
             except Exception as e:
                 console_error(e)
                 return
-
             try:
-                # Get IV surface dataframe
                 df = iv_surface(self._ticker)
                 self.console_output(df)
                 plot_iv_surface(df, self._ticker, strike_range, res, cmap)
             except ValueError as e:
                 console_error(e)
-
-                # Clear plot figure on error to prevent ghost plots
                 plt.clf()
                 plt.close()
                 return
 
         elif subcmd == "skew":
             try:
-                # Fetch and print IV skew dataframe
                 df = iv_skew(self._ticker, expiration)
                 self.console_output(df)
 
-                # Plot IV skew dataframe automatically
                 plt.figure(figsize=(10, 5))
                 ax = plt.gca()
-
                 ax.plot(df["strike"], df["impliedVolatility"])
                 ax.set_xlabel("Strike")
                 ax.set_ylabel("Implied Volatility")
@@ -547,16 +503,12 @@ class MainCLI(cmd.Cmd):
 
                 plt.tight_layout()
                 plt.show()
-
             except ValueError as e:
                 console_error(e)
-
-                # Clear plot figure on error to prevent ghost plots
                 plt.clf()
                 plt.close()
                 return
 
-        # Invalid subcmd
         else:
             console.print(
                 f"[red]Error: '{subcmd}' is not recognized as a valid sub-command. Use 'skew' or 'surface'."
@@ -587,13 +539,9 @@ class MainCLI(cmd.Cmd):
 
         index = args[0]
         args.remove(index)
-
-        # Check that last output is a dataframe / exists
         if not isinstance(df, pd.DataFrame):
             console.print(f"[red]Error: Last output '{df}' is not a DataFrame.")
             return
-
-        # Check that dataframe is not empty
         if df.empty:
             console.print(f"[red]Error: DataFrame '{df}' is empty, cannot plot.")
             return
@@ -619,13 +567,10 @@ class MainCLI(cmd.Cmd):
             plt.close()
             return
 
-        # Plot all columns if 'all'
         if args[0] == "all":
             columns = list(df.columns[df.columns != index])
         else:
             columns = args
-
-        # Plot columns
         for column in columns:
             try:
                 ax.plot(series, df[column], label=column)
