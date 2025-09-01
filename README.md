@@ -6,14 +6,14 @@ VolSuite is a python-based CLI tool designed for intuitive equity data retrieval
 
 VolSuite is a CLI tool, meaning that all user interaction is done through the terminal/command prompt window. In order to perform an action, a line should begin with a base command followed by its necessary arguments and optional flags – a full list of available commands and their arguments can be viewed by typing 'help (\<command\>)'. Commands which retrieve data will require a ticker to be specified by the user when running, this can be done by typing 'ticker \<symbol\>'.
 
-> Note: Flags are optional arguments which can be used to configure the output of some commands. They are formatted as '--\<flag\>=\<value\>' for parametric flags and '-\<flag\>' for boolean flags.
+> Flags are optional arguments which can be used to configure the output of some commands. They are formatted as '--\<flag\>=\<value\>' for parametric flags and '-\<flag\>' for boolean flags.
 
 Upon first running, VolSuite will create a default config.json file in the same directory as the executable. This file can be modified directly by the user or through the CLI by using the 'config' command.
 
 ## Installation
 
 ### Quick Install:
-To install the standalone executable [get the latest release from GitHub](https://github.com/liam-duke/volsuite/releases).
+To install the standalone executable [download the latest release from GitHub](https://github.com/liam-duke/volsuite/releases).
 
 ### Developer Setup:
 To install and run the source code as a python module:
@@ -116,6 +116,4 @@ iv surface
 
 > Note: Implied volatilites are currently retrieved from yfinance, and filtered by OTM prices.
 
-## License
-
-VolSuite uses the MIT License.
+This project uses the MIT License.

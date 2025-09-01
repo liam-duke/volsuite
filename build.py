@@ -21,9 +21,9 @@ def build():
     subprocess.run(
         [
             "pyinstaller",
+            "src/volsuite/main.py",
             "--noconfirm",
             "--name=volsuite",
-            "src/volsuite/main.py",
             "--hidden-import=scipy._cyutility",
             "--onefile",
         ],

@@ -28,7 +28,7 @@ from volsuite.utils.volatility import hv, iv_skew, iv_surface, plot_iv_surface
 BASE_PATH = get_base_path()
 CONFIG_PATH = BASE_PATH / "config.json"
 
-version = "0.10"
+version = "0.1.1"
 console = Console()
 config = init_config(CONFIG_PATH)
 
