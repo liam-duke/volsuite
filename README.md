@@ -24,8 +24,8 @@ cd volsuite
 
 # Optional virtual environment setup
 python -m venv .venv
-source .venv/bin/activate   # MacOS/Linux
-.venv\scripts\activate        # Windows
+source .venv/bin/activate  # MacOS/Linux
+.venv\scripts\activate     # Windows
 
 pip install -r requirements.txt
 cd src
