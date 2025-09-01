@@ -47,8 +47,6 @@ def create_config(config_path):
     Args:
         config_path: Path of new config.json as a pathlib._local.WindowsPath object.
     """
-
-    # Create new config.json
     with config_path.open("w") as f:
         json.dump(DEFAULT_CONFIG, f, indent=2)
         console.print(
