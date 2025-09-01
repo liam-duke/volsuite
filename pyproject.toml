@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "volsuite"
+version = "0.11"
+description = "VolSuite is a CLI tool for financial data retrieval and analysis via the yfinance API."
+readme = "README.md"
+requires-python = ">=3.13"
+lisence = { file = "LISENCE.txt" }
+authors = [
+  { name="Liam Duke", email="liamdukenyc@gmail.com" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Environment :: Console"
+]
+
+[project.urls]
+Homepage = "https://github.com/liam-duke/volsuite"
