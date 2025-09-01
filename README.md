@@ -34,7 +34,7 @@ python -m volsuite.main
 
 To build a local executable with pyinstaller:
 
-Ensure that you are in the project root folder and activate the virtual environment if configured then
+Ensure that you are in the project root folder, activate the virtual environment if configured, then
 ```
 pip install pyinstaller
 python build.py
