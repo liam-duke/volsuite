@@ -25,7 +25,6 @@ def hv(ticker: yf.Ticker, method: str, timeperiod, windows: list):
     Raises:
         ValueError: An unexpected method is taken in by the function.
     """
-    # Fetch price data
     if isinstance(timeperiod, tuple):
         df = ticker.history(start=timeperiod[0], end=timeperiod[1])
         period = f"{timeperiod[0]}_{timeperiod[1]}"
@@ -39,24 +38,18 @@ def hv(ticker: yf.Ticker, method: str, timeperiod, windows: list):
     # Rolling Close-to-Close volatility
     if method == "close":
         log_returns = np.log(df["Close"] / df["Close"].shift(1)).dropna()
-
-        # Rolling vol
         for w in windows:
             hv_df[f"{w}d_close"] = log_returns.rolling(window=w).std(ddof=0) * np.sqrt(
                 252
             )
-
-        # Realized vol over entire period
         hv_realized = log_returns.std(ddof=0) * np.sqrt(252)
 
     # Rolling Parkinson volatility
     elif method == "parkinson":
         log_hl = np.log(df["High"] / df["Low"])
-
         for w in windows:
             parkinson_var = (1 / (4 * np.log(2))) * (log_hl**2).rolling(window=w).mean()
             hv_df[f"{w}d_parkinson"] = np.sqrt(parkinson_var) * np.sqrt(252)
-
         hv_realized = np.sqrt((1 / (4 * np.log(2))) * (log_hl**2).mean()) * np.sqrt(252)
 
     # Rolling Garman-Klass volatility
@@ -64,10 +57,8 @@ def hv(ticker: yf.Ticker, method: str, timeperiod, windows: list):
         log_hl = np.log(df["High"] / df["Low"])
         log_co = np.log(df["Close"] / df["Open"])
         gk_var = 0.5 * log_hl**2 - (2 * np.log(2) - 1) * log_co**2
-
         for w in windows:
             hv_df[f"{w}d_gk"] = np.sqrt(gk_var.rolling(window=w).mean()) * np.sqrt(252)
-
         hv_realized = np.sqrt(gk_var.mean()) * np.sqrt(252)
 
     else:
@@ -94,7 +85,6 @@ def iv_skew(ticker: yf.Ticker, expiration: str = ""):
     Returns:
         A dataframe of implied volatilities at each strike for the given expiration.
     """
-    # Fetch option chains
     calls = ticker.option_chain(expiration).calls
     puts = ticker.option_chain(expiration).puts
 
@@ -102,7 +92,6 @@ def iv_skew(ticker: yf.Ticker, expiration: str = ""):
     otm_calls = calls[calls["inTheMoney"] == False]
     otm_puts = puts[puts["inTheMoney"] == False]
 
-    # Build skew dataframe
     iv_df = pd.concat(
         [
             otm_puts[["strike", "impliedVolatility"]].copy(),
@@ -129,7 +118,6 @@ def iv_surface(ticker: yf.Ticker):
     Returns:
         A dataframe of implied volatilites for each strike at every expiration available.
     """
-    # Get expirations and today's date for time to expiry
     expirations = ticker.options
     current_date = pd.Timestamp(datetime.today())
 
@@ -137,7 +125,6 @@ def iv_surface(ticker: yf.Ticker):
 
     for expiration in expirations:
         chain = ticker.option_chain(expiration)
-
         for df in [chain.puts, chain.calls]:
             otm = df[~df["inTheMoney"]].copy()
             otm = otm[["strike", "impliedVolatility"]].rename(
@@ -190,25 +177,20 @@ def plot_iv_surface(
     y = iv_surface_df_filtered["dte"].values
     z = iv_surface_df_filtered["impliedvolatility"].values
 
-    # Organize data into meshgrid
+    # Create meshgrid and interpolate
     xi = np.linspace(x.min(), x.max(), res + 1)
     yi = np.linspace(y.min(), y.max(), res + 1)
     XI, YI = np.meshgrid(xi, yi)
-
-    # Interpolate iv on the grid
     ZI = griddata((x, y), z, (XI, YI), method="linear")
 
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection="3d")
-
     surf = ax.plot_surface(XI, YI, ZI, cmap=cmap, edgecolor=None)
 
-    # Label axes and plot
     ax.set_xlabel("Strike")
     ax.set_ylabel("Time to Maturity (Days)")
     ax.set_zlabel("Implied Volatility")
     ax.set_title(f"{ticker.ticker} Implied Volatility Surface")
-
     fig.colorbar(surf, shrink=0.5, aspect=10)
 
     plt.show()

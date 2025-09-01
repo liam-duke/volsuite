@@ -6,7 +6,6 @@ from datetime import datetime
 from rich.console import Console
 import shlex
 
-# Initialize rich printing
 console = Console()
 
 
@@ -15,10 +14,8 @@ def get_base_path():
     Get base path depending on whether the program is running as a script or an exe.
     """
     if getattr(sys, "frozen", False):
-        # Navigate to parent folder of volsuite.exe
         return Path(sys.executable).parent
     else:
-        # Navigate to src\ folder
         return Path(__file__).resolve().parent.parent
 
 
@@ -93,11 +90,11 @@ def type_eval(s: str):
     if not isinstance(s, str):
         return s
 
-    # Evaluate list-like
+    # List-like
     if s.startswith("[") and s.endswith("]"):
         return [type_eval(i) for i in s[1:-1].split(",")]
 
-    # Evaluate numberic
+    # Numeric
     try:
         n = float(s)
         if n % 1 == 0:

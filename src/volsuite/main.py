@@ -209,13 +209,11 @@ class MainCLI(cmd.Cmd):
                 f"{df.attrs['ticker']}_{df.attrs['datatype']}_{df.attrs['period']}"
             )
 
-        # Build filepath
         filename = Path(filename).with_suffix(".csv")
         export_path = BASE_PATH / str(config["export_folder"])
         filepath = export_path / filename
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
-        # Save dataframe to CSV
         try:
             df.to_csv(filepath, index=False)
             console.print(f"[green]DataFrame successfully saved to '{filepath}'.")
@@ -299,7 +297,6 @@ class MainCLI(cmd.Cmd):
             console_error(e)
             return
 
-        # Handle time period
         if args[0] in VALID_PERIODS:
             if len(args) > 1:
                 if args[1] in VALID_INTERVALS:
@@ -315,11 +312,9 @@ class MainCLI(cmd.Cmd):
                     return
             else:
                 df = self._ticker.history(period=args[0]).reset_index()
-
                 # Include metadata
                 df.attrs["period"] = f"{args[0]}"
 
-        # Handle date interval
         elif is_date(args[0]):
             if len(args) > 1:
                 try:
@@ -391,7 +386,6 @@ class MainCLI(cmd.Cmd):
 
             self.console_output(df)
 
-        # Catch invalid date format and print available expirations
         except ValueError as e:
             console_error(e)
             return
@@ -424,7 +418,6 @@ class MainCLI(cmd.Cmd):
                     f"[red]Error: Missing end date. Use date format '%Y-%m-%d'."
                 )
                 return
-
         else:
             console.print(
                 f"[red]Error: '{args[1]}' is not recognized as a valid time period or date. Use {VALID_PERIODS} or date format '$Y-$m-$d'."
@@ -546,7 +539,6 @@ class MainCLI(cmd.Cmd):
             console.print(f"[red]Error: DataFrame '{df}' is empty, cannot plot.")
             return
 
-        # Handle plot style
         try:
             style = str(flags.get("--style", config["plot_style"]))
             plt.style.use(style)
@@ -557,12 +549,10 @@ class MainCLI(cmd.Cmd):
         plt.figure(figsize=(10, 5))
         ax = plt.gca()
 
-        # Check existence of specified index
         try:
             series = df[index]
         except KeyError as e:
             console.print(f"[red]Error: Index {e} not found in DataFrame")
-            # Clear plot figure
             plt.clf()
             plt.close()
             return
@@ -576,7 +566,6 @@ class MainCLI(cmd.Cmd):
                 ax.plot(series, df[column], label=column)
             except KeyError as e:
                 console.print(f"[red]Error: Column {e} not found in DataFrame.")
-                # Clear plot figure
                 plt.clf()
                 plt.close()
                 return
@@ -590,7 +579,6 @@ class MainCLI(cmd.Cmd):
         if len(df) > 20:
             plt.xticks(rotation=45, ha="right")
 
-        # Handle flags
         try:
             title = str(flags.get("--title", f"{self._ticker.ticker} {columns}"))
             xlabel = str(flags.get("--xlabel", index.title()))
