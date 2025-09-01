@@ -8,6 +8,8 @@ console = Console()
 
 DEFAULT_CONFIG = {
     "default_ticker": "",
+    "display_max_colwidth": 50,
+    "display_max_rows": 50,
     "export_folder": "exports",
     "hv_rolling_windows": [5, 10, 20, 50],
     "iv_surface_cmap": "jet",
@@ -16,8 +18,6 @@ DEFAULT_CONFIG = {
     "plot_grid": False,
     "plot_legend": False,
     "plot_style": "default",
-    "display_max_rows": 50,
-    "display_max_colwidth": 50,
 }
 
 
