@@ -32,8 +32,9 @@ cd src
 python -m volsuite.main
 ```
 
-To build a local executable in with PyInstaller, ensure that you are in the project root folder and:
+To build a local executable in with PyInstaller:
 
+Ensure that you are in the project root folder and activate the virtual environment if configured then
 ```
 pip install pyinstaller
 python build.py
