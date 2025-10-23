@@ -74,7 +74,7 @@ def hv(ticker: yf.Ticker, method: str, timeperiod, windows: list):
     return hv_df.reset_index(), hv_realized
 
 
-def iv_skew(ticker: yf.Ticker, expiration: str = ""):
+def iv_skew(ticker: yf.Ticker, strike_range: float, expiration: str = ""):
     """
     Create implied volatility skew for a given ticker and expiration. Computes skew with OTM options (puts below strike, calls above strike).
 
@@ -87,15 +87,21 @@ def iv_skew(ticker: yf.Ticker, expiration: str = ""):
     """
     calls = ticker.option_chain(expiration).calls
     puts = ticker.option_chain(expiration).puts
+    spot = ticker.fast_info["lastPrice"]
 
-    # Filter for OTM options
-    otm_calls = calls[calls["inTheMoney"] == False]
-    otm_puts = puts[puts["inTheMoney"] == False]
+    lower_strike = spot * (1 - strike_range)
+    upper_strike = spot * (1 + strike_range)
+
+    # Filter for OTM options within strike range
+    calls = calls[(calls["strike"] >= lower_strike) & (calls["strike"] <= upper_strike)]
+    puts = puts[(puts["strike"] >= lower_strike) & (puts["strike"] <= upper_strike)]
+    calls = calls[calls["inTheMoney"] == False]
+    puts = puts[puts["inTheMoney"] == False]
 
     iv_df = pd.concat(
         [
-            otm_puts[["strike", "impliedVolatility"]].copy(),
-            otm_calls[["strike", "impliedVolatility"]].copy(),
+            puts[["strike", "impliedVolatility"]].copy(),
+            calls[["strike", "impliedVolatility"]].copy(),
         ]
     )
     iv_df = iv_df.dropna()

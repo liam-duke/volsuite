@@ -452,7 +452,7 @@ class MainCLI(cmd.Cmd):
         iv <surface|skew> (expiration)
         Flags:
         --res <int>     : resolution of volatility surface plot.
-        --range <float> : percent range around spot price for strikes of volatility surface plot.
+        --range <float> : percent range from spot price to filter for strikes.
         --cmap <str>    : colormap of volatility surface plot.
         """
         command = "iv"
@@ -467,7 +467,7 @@ class MainCLI(cmd.Cmd):
         if subcmd == "surface":
             try:
                 res = int(flags.get("--res", config["iv_surface_res"]))
-                strike_range = float(flags.get("--range", config["iv_surface_range"]))
+                strike_range = float(flags.get("--range", config["iv_strike_range"]))
                 cmap = str(flags.get("--cmap", config["iv_surface_cmap"]))
             except Exception as e:
                 console_error(e)
@@ -484,7 +484,8 @@ class MainCLI(cmd.Cmd):
 
         elif subcmd == "skew":
             try:
-                df = iv_skew(self._ticker, expiration)
+                strike_range = float(flags.get("--range", config["iv_strike_range"]))
+                df = iv_skew(self._ticker, strike_range, expiration)
                 self.console_output(df)
 
                 plt.figure(figsize=(10, 5))
