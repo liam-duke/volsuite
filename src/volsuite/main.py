@@ -24,9 +24,9 @@ from volsuite.utils.functions import (
 )
 from volsuite.utils.volatility import hv, iv_skew, iv_surface, plot_iv_surface
 
-
 BASE_PATH = get_base_path()
 CONFIG_PATH = BASE_PATH / "config.json"
+DOWNLOADS_PATH = Path.home() / "Downloads"
 
 version = "0.1.1"
 console = Console()
@@ -205,12 +205,25 @@ class MainCLI(cmd.Cmd):
             console.print("[red]Error: No cached data to export.")
             return
         if not filename:
-            filename = (
-                f"{df.attrs['ticker']}_{df.attrs['datatype']}_{df.attrs['period']}"
-            )
+            try:
+                filename = (
+                    f"{df.attrs['ticker']}_{df.attrs['datatype']}_{df.attrs['period']}"
+                )
+            except KeyError as e:
+                console_error(e)
 
         filename = Path(filename).with_suffix(".csv")
-        export_path = BASE_PATH / str(config["export_folder"])
+        export_path = str(config["export_path"])
+
+        if not export_path:
+            config["export_path"] = str(DOWNLOADS_PATH)
+            export_path = str(DOWNLOADS_PATH)
+            console.print(
+                f"Info: No export path specified in config.json, created default export path at '{DOWNLOADS_PATH}'."
+            )
+            with open(CONFIG_PATH, "w") as f:
+                json.dump(config, f, indent=2)
+
         filepath = export_path / filename
         filepath.parent.mkdir(parents=True, exist_ok=True)
 

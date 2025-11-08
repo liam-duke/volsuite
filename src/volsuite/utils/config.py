@@ -12,7 +12,7 @@ DEFAULT_CONFIG = {
     "default_ticker": "",
     "display_max_colwidth": 50,
     "display_max_rows": 50,
-    "export_folder": "exports",
+    "export_path": "",
     "hv_rolling_windows": [5, 10, 20, 50],
     "iv_strike_range": 0.2,
     "iv_surface_cmap": "jet",
